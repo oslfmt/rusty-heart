@@ -46,7 +46,7 @@ fn parse_csv() -> Result<(), Box<dyn Error>> {
     let first_half_avg = calculate_average(first_half);
     let second_half_avg = calculate_average(second_half);
 
-    println!("First: {}, Second {}", first_half_avg, second_half_avg);
+    println!("First half average HR: {}\nSecond half average HR: {}", first_half_avg, second_half_avg);
 
     Ok(())
 }
