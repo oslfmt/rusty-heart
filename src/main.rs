@@ -1,6 +1,8 @@
 use clap::Parser;
 use std::{error::Error, process::Command};
 
+const HEART_RATE_CSV_INDEX: usize = 7;
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Cli {
@@ -11,7 +13,16 @@ struct Cli {
     input: String,
 }
 
-fn simple() -> Result<(), Box<dyn Error>> {
+fn calculate_average(values: &[u32]) -> f32 {
+    let mut sum = 0;
+    for i in values {
+        sum += i;
+    }
+
+    return sum as f32 / values.len() as f32;
+}
+
+fn parse_csv() -> Result<(), Box<dyn Error>> {
     let mut reader = csv::ReaderBuilder::new()
         .delimiter(b';')
         .from_path("out/tracks.csv")
@@ -21,7 +32,7 @@ fn simple() -> Result<(), Box<dyn Error>> {
     let mut heart_rates = vec![];
     for result in reader.records() {
         let record = result?;
-        let heart_rate = record.get(7).unwrap().parse::<u32>().unwrap();
+        let heart_rate = record.get(HEART_RATE_CSV_INDEX).unwrap().parse::<u32>().unwrap();
 
         heart_rates.push(heart_rate);
         // println!("{:?}", heart_rate);
@@ -32,18 +43,8 @@ fn simple() -> Result<(), Box<dyn Error>> {
     let half_index = heart_rates.len() / 2;
     let (first_half, second_half) = heart_rates.split_at(half_index);
 
-    let mut sum = 0;
-    for i in first_half {
-        sum += i;
-    }
-    let first_half_avg: f32 = sum as f32 / first_half.len() as f32;
-
-    // println!("{:?}", first_half);
-    let mut second_sum = 0;
-    for j in second_half {
-        second_sum += j;
-    }
-    let second_half_avg: f32 = second_sum as f32 / second_half.len() as f32;
+    let first_half_avg = calculate_average(first_half);
+    let second_half_avg = calculate_average(second_half);
 
     println!("First: {}, Second {}", first_half_avg, second_half_avg);
 
@@ -62,7 +63,7 @@ fn main() {
 
     if output.status.success() {
         // default output folder should be ./out
-        if let Err(err) = simple() {
+        if let Err(err) = parse_csv() {
             println!("error running example: {}", err);
         }
     }
