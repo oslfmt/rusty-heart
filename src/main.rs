@@ -1,4 +1,5 @@
-use std::{error::Error, io, process::Command};
+use core::str;
+use std::{error::Error, io::{self, Write}, process::Command};
 
 fn simple() -> Result<(), Box<dyn Error>> {
     let mut reader = csv::ReaderBuilder::new()
@@ -42,12 +43,16 @@ fn simple() -> Result<(), Box<dyn Error>> {
 fn main() {
 
     let output = Command::new("/home/victor/tcx-to-csv/bin/Release/net8.0/linux-x64/tcx-to-csv")
-        .arg("-input-folder")
-        .arg("/mnt/c/Users/voodo/Downloads/activity_16973805783.tcx")
+        .arg("-input-folder=/mnt/c/Users/voodo/Downloads/tcx-test")
+        // .arg("/mnt/c/Users/voodo/Downloads/tcx-test/activity_16973805783.tcx")
         .output()
         .expect("Failed to run tcx-to-csv converter");
 
-    // if let Err(err) = simple() {
-    //     println!("error running example: {}", err);
-    // }
+    println!("{:?}", output.stdout);
+    if output.status.success() {
+        // default output folder should be ./out
+        if let Err(err) = simple() {
+            println!("error running example: {}", err);
+        }
+    }
 }
