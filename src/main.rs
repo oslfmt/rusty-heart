@@ -1,10 +1,20 @@
-use core::str;
-use std::{error::Error, io::{self, Write}, process::Command};
+use clap::Parser;
+use std::{error::Error, process::Command};
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Cli {
+    /// Input tcx data file; NOTE: assumes this is in windows Downloads and in a dir
+    // TODO: make this input accept just a tcx file, not a dir, or optionally a dir of tcx files
+    // TODO: don't assume windows Downloads, make this a cleaner solution
+    #[arg(short, long)]
+    input: String,
+}
 
 fn simple() -> Result<(), Box<dyn Error>> {
     let mut reader = csv::ReaderBuilder::new()
         .delimiter(b';')
-        .from_path("garmin-converted/tracks.csv")
+        .from_path("out/tracks.csv")
         .unwrap();
 
     let mut count = 0;
@@ -41,14 +51,15 @@ fn simple() -> Result<(), Box<dyn Error>> {
 }
 
 fn main() {
-
+    let cli = Cli::parse();
+    let input_file = cli.input;
+    
     let output = Command::new("/home/victor/tcx-to-csv/bin/Release/net8.0/linux-x64/tcx-to-csv")
-        .arg("-input-folder=/mnt/c/Users/voodo/Downloads/tcx-test")
+        .arg(format!("-input-folder=/mnt/c/Users/voodo/Downloads/{}", input_file))
         // .arg("/mnt/c/Users/voodo/Downloads/tcx-test/activity_16973805783.tcx")
         .output()
         .expect("Failed to run tcx-to-csv converter");
 
-    println!("{:?}", output.stdout);
     if output.status.success() {
         // default output folder should be ./out
         if let Err(err) = simple() {
