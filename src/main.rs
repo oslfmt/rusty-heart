@@ -22,6 +22,10 @@ fn calculate_average(values: &[u32]) -> f32 {
     return sum as f32 / values.len() as f32;
 }
 
+fn calculate_percent_increase(a: f32, b: f32) -> f32 {
+    ((b / a) - 1.0) * 100.0
+}
+
 fn parse_csv() -> Result<(), Box<dyn Error>> {
     let mut reader = csv::ReaderBuilder::new()
         .delimiter(b';')
@@ -35,7 +39,6 @@ fn parse_csv() -> Result<(), Box<dyn Error>> {
         let heart_rate = record.get(HEART_RATE_CSV_INDEX).unwrap().parse::<u32>().unwrap();
 
         heart_rates.push(heart_rate);
-        // println!("{:?}", heart_rate);
         count += 1;
     }
 
@@ -47,6 +50,7 @@ fn parse_csv() -> Result<(), Box<dyn Error>> {
     let second_half_avg = calculate_average(second_half);
 
     println!("First half average HR: {}\nSecond half average HR: {}", first_half_avg, second_half_avg);
+    println!("Percent increase: {}", calculate_percent_increase(first_half_avg, second_half_avg));
 
     Ok(())
 }
