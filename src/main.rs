@@ -1,6 +1,6 @@
 use clap::{Parser, ArgGroup};
 use core::str;
-use std::{error::Error, fmt::format, process::Command};
+use std::{error::Error, process::Command};
 
 const HEART_RATE_CSV_INDEX: usize = 7;
 const TCX_TO_CSV_EXECUTABLE_PATH: &str = "/home/victor/tcx-to-csv/bin/Release/net8.0/linux-x64/tcx-to-csv";
