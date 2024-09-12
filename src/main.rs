@@ -1,16 +1,21 @@
-use clap::Parser;
+use clap::{Parser, ArgGroup};
 use std::{error::Error, process::Command};
 
 const HEART_RATE_CSV_INDEX: usize = 7;
+const TCX_TO_CSV_EXECUTABLE_PATH: &str = "/home/victor/tcx-to-csv/bin/Release/net8.0/linux-x64/tcx-to-csv";
 
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(version, about = "A command line app to calculate first and second half HR from tcx files", long_about = None)]
+#[command(group(ArgGroup::new("group").required(true).args(&["input_folder", "full_path"])))]
 struct Cli {
-    /// Input tcx data file; NOTE: assumes this is in windows Downloads and in a dir
+    /// Directory that contains the tcx file; NOTE: assumes a leading path of: /mnt/c/Users/voodo/Downloads
     // TODO: make this input accept just a tcx file, not a dir, or optionally a dir of tcx files
     // TODO: don't assume windows Downloads, make this a cleaner solution
     #[arg(short, long)]
-    input: String,
+    input_folder: Option<String>,
+    /// Absolute path to directory that contains tcx file
+    #[arg(short, long)]
+    full_path: Option<String>,
 }
 
 fn calculate_average(values: &[u32]) -> f32 {
@@ -32,14 +37,14 @@ fn parse_csv() -> Result<(), Box<dyn Error>> {
         .from_path("out/tracks.csv")
         .unwrap();
 
-    let mut count = 0;
+    // let mut count = 0;
     let mut heart_rates = vec![];
     for result in reader.records() {
         let record = result?;
         let heart_rate = record.get(HEART_RATE_CSV_INDEX).unwrap().parse::<u32>().unwrap();
 
         heart_rates.push(heart_rate);
-        count += 1;
+        // count += 1;
     }
 
     // println!("{:?}", count);
@@ -55,12 +60,9 @@ fn parse_csv() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn main() {
-    let cli = Cli::parse();
-    let input_file = cli.input;
-    
-    let output = Command::new("/home/victor/tcx-to-csv/bin/Release/net8.0/linux-x64/tcx-to-csv")
-        .arg(format!("-input-folder=/mnt/c/Users/voodo/Downloads/{}", input_file))
+fn run_tcx_to_csv_executable(input_arg: &str) {
+    let output = Command::new(TCX_TO_CSV_EXECUTABLE_PATH)
+        .arg(input_arg)
         // .arg("/mnt/c/Users/voodo/Downloads/tcx-test/activity_16973805783.tcx")
         .output()
         .expect("Failed to run tcx-to-csv converter");
@@ -68,7 +70,16 @@ fn main() {
     if output.status.success() {
         // default output folder should be ./out
         if let Err(err) = parse_csv() {
-            println!("error running example: {}", err);
+            println!("error running program: {}", err);
         }
+    }
+}
+
+fn main() {
+    let cli = Cli::parse();
+    if let Some(input_dir) = cli.input_folder {
+        run_tcx_to_csv_executable(&format!("-input-folder=/mnt/c/Users/voodo/Downloads/{}", input_dir));
+    } else if let Some(input_dir_full_path) = cli.full_path {
+        run_tcx_to_csv_executable(&format!("-input-folder={}", input_dir_full_path));
     }
 }
