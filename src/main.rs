@@ -1,5 +1,6 @@
 use clap::{Parser, ArgGroup};
-use std::{error::Error, process::Command};
+use core::str;
+use std::{error::Error, fmt::format, process::Command};
 
 const HEART_RATE_CSV_INDEX: usize = 7;
 const TCX_TO_CSV_EXECUTABLE_PATH: &str = "/home/victor/tcx-to-csv/bin/Release/net8.0/linux-x64/tcx-to-csv";
@@ -71,6 +72,8 @@ fn run_tcx_to_csv_executable(input_arg: &str) {
         if let Err(err) = parse_csv() {
             println!("error running program: {}", err);
         }
+    } else {
+        println!("{}", str::from_utf8(&output.stderr).unwrap())
     }
 }
 
