@@ -10,7 +10,6 @@ const TCX_TO_CSV_EXECUTABLE_PATH: &str = "/home/victor/tcx-to-csv/bin/Release/ne
 struct Cli {
     /// Directory that contains the tcx file; NOTE: assumes a leading path of: /mnt/c/Users/voodo/Downloads
     // TODO: make this input accept just a tcx file, not a dir, or optionally a dir of tcx files
-    // TODO: don't assume windows Downloads, make this a cleaner solution
     #[arg(short, long)]
     input_folder: Option<String>,
     /// Absolute path to directory that contains tcx file
@@ -78,6 +77,7 @@ fn run_tcx_to_csv_executable(input_arg: &str) {
 fn main() {
     let cli = Cli::parse();
     if let Some(input_dir) = cli.input_folder {
+        // TODO: dynamically get user, not hardcoded to voodo
         run_tcx_to_csv_executable(&format!("-input-folder=/mnt/c/Users/voodo/Downloads/{}", input_dir));
     } else if let Some(input_dir_full_path) = cli.full_path {
         run_tcx_to_csv_executable(&format!("-input-folder={}", input_dir_full_path));
